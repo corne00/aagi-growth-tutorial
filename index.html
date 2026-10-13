@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Introduction · Dynamic crop growth modelling</title>
+<meta name="description" content="Introduction to modelling longitudinal wheat biomass with differential equations, illustrated with APSIM trajectories from Bustos-Korts et al. (2019).">
+<link rel="stylesheet" href="assets/introduction.css"><link rel="stylesheet" href="assets/vendor/katex/katex.min.css">
+<script defer src="assets/vendor/katex/katex.min.js"></script><script defer src="assets/vendor/katex/contrib/auto-render.min.js"></script><script defer src="assets/vendor/plotly.min.js"></script><script defer src="assets/apsim-intro-data.js"></script><script defer src="assets/introduction.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header><nav class="topnav" aria-label="Main navigation"><a class="sitename" href="index.html">Dynamic crop growth modelling</a><a href="index.html" aria-current="page">Introduction</a><a href="#references">References</a></nav></header>
+<div class="page"><main id="main">
+<h1>Introduction</h1>
+<section id="longitudinal"><h2>Longitudinal phenotypes and environmental response</h2>
+<p>Final biomass or grain yield does not describe when growth occurred or how a genotype responded to changing conditions. Genotypes with similar final performance may differ in their growth histories, and their relative performance can change across environments and during the season.</p>
+<p>High-throughput phenotyping provides repeated measurements of growth-related traits. We investigate how these time series can estimate genotype-specific responses and support predictions under different environmental conditions. Our response variable is <strong>biomass over time</strong>.</p>
+</section>
+<section id="trajectories"><h2>An APSIM demonstration dataset</h2>
+<p>We use daily wheat biomass simulated by Bustos-Korts et al. (2019) with APSIM-Wheat. The study includes 199 genotypes in 124 site-year environments: Emerald, Merredin, Narrabri and Yanco over 1983–2013. Historical environmental information and genotype-specific physiological parameters drive the simulations. These are model-generated phenotypes, rather than field biomass measurements <a href="#ref-bustos">[1]</a>.</p>
+<p>The figure shows the same genotypes across four locations. Select a year and genotypes to compare growth rates, final biomass and timing. G×E is present when genotype contrasts differ between environments.</p>
+<div class="figure-controls"><div><label for="year">Year</label><select id="year"><option value="1993">1993</option><option value="2008" selected>2008</option><option value="2010">2010</option></select></div><fieldset><legend>Displayed genotypes</legend><div id="genotype-options"></div></fieldset></div>
+<figure><div id="trajectories-plot" role="img" aria-label="Biomass trajectories for selected genotypes in four Australian locations"></div><figcaption><strong>Figure 1.</strong> APSIM biomass trajectories, in kg/ha, against days after sowing. Genotype colours are consistent across locations. Each curve ends at its last available simulated day; shorter series are not extrapolated or carried forward. The six available genotypes were selected to illustrate contrasting biomass profiles in 2008 and are not a representative sample of the population.</figcaption></figure>
+<p id="plot-status" role="status" aria-live="polite"></p>
+<noscript><p>JavaScript is needed to display the interactive trajectories. The introduction and references can still be read without it.</p></noscript>
+</section>
+<section id="apsim"><h2>What APSIM represents</h2>
+<p>APSIM combines weather, soil, management and genotype-specific physiological parameters to simulate crop and soil processes over time. The schematic summarises its main inputs and outputs <a href="#ref-apsim">[2]</a>.</p>
+<figure>
+<div class="model-flow" role="group" aria-label="APSIM inputs, daily process simulation and outputs">
+<section class="flow-block"><h3>Inputs</h3><ul><li>Weather: temperature, radiation, rainfall</li><li>Soil properties and initial conditions</li><li>Management: sowing, fertilisation and other operations</li><li>Genotype-specific physiological parameters</li></ul></section>
+<div class="flow-arrow" aria-hidden="true">→</div>
+<section class="flow-block"><h3>APSIM-Wheat</h3><p>Daily simulation of crop development, resource capture, biomass production and allocation, coupled with soil processes.</p></section>
+<div class="flow-arrow" aria-hidden="true">→</div>
+<section class="flow-block"><h3>Outputs</h3><ul><li>Biomass through time</li><li>Development and canopy traits</li><li>Grain yield</li><li>Water and nutrient status</li></ul></section>
+</div>
+<figcaption><strong>Figure 2.</strong> A simplified description of APSIM’s inputs and outputs. Our analysis uses the biomass trajectories and weather records. APSIM water-status outputs and SNP markers will not be supplied to our fitted models.</figcaption>
+</figure>
+</section>
+<section id="odes"><h2>A dynamic model for biomass</h2>
+<p>We describe growth with an ordinary differential equation. For genotype \(g\) in environment \(e\), let \(B_{ge}(t)\) denote biomass and \(\mathbf u_e(t)\) denote environmental drivers. A model for the rate of change is</p>
+<div class="math">$$\frac{dB_{ge}(t)}{dt}=f\!\left(B_{ge}(t),\mathbf u_e(t);\boldsymbol\beta_g\right).$$</div>
+<p>The function \(f\) specifies how the current biomass and environmental conditions influence growth. The coefficients \(\boldsymbol\beta_g\) allow responses to differ between genotypes. Given an initial biomass and a driver history, integrating the equation produces a predicted biomass trajectory.</p>
+<p>We will estimate a compact approximation using candidate functions of biomass and weather. Later pages will cover estimation and evaluation of trajectory and G×E recovery. The aim is a useful reduced representation, rather than recovery of every APSIM process.</p>
+</section>
+<section id="scope"><h2>Scope of the analysis</h2>
+<p>The analysis uses biomass and observed weather, including quantities derived from weather history. It excludes SNP markers and APSIM water-status outputs as predictors; the estimator does not receive the generating physiological parameters. Soil and management effects are present in APSIM but are not fully represented by weather alone, limiting what our reduced model can capture.</p>
+</section>
+<section id="references"><h2>References</h2>
+<ol class="references"><li id="ref-bustos">Bustos-Korts, D., Malosetti, M., Chenu, K., Chapman, S. C., Boer, M. P., Zheng, B. and van Eeuwijk, F. A. (2019). From QTLs to Adaptation Landscapes: Using Genotype-To-Phenotype Models to Characterize G×E Over Time. <em>Frontiers in Plant Science</em>, 10, 1540. <a href="https://doi.org/10.3389/fpls.2019.01540">doi:10.3389/fpls.2019.01540</a>. <a href="https://research.wur.nl/en/datasets/apsim-simulated-wheat-genotypes-corresponding-to-the-paper-bustos/">Dataset record</a>.</li>
+<li id="ref-apsim">Holzworth, D. P. et al. (2014). APSIM — Evolution towards a new generation of agricultural systems simulation. <em>Environmental Modelling &amp; Software</em>, 62, 327–350. <a href="https://doi.org/10.1016/j.envsoft.2014.07.009">doi:10.1016/j.envsoft.2014.07.009</a>.</li></ol>
+</section>
+</main>
+<aside class="contents"><nav aria-label="On this page"><h2>On this page</h2><a href="#longitudinal">Longitudinal phenotypes</a><a href="#trajectories">APSIM dataset</a><a href="#apsim">APSIM inputs and outputs</a><a href="#odes">Dynamic model</a><a href="#scope">Analysis scope</a><a href="#references">References</a></nav></aside>
+</div><footer><div>Dynamic crop growth modelling · Introduction</div></footer>
+</body></html>
