@@ -1,0 +1,6 @@
+{
+  "name": "aagi-apsim-wheat-workshop",
+  "private": true,
+  "scripts": {"test": "node tests/ui.cjs && python3 tests/results.py"},
+  "devDependencies": {"jsdom": "30.1.2"}
+}

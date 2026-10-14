@@ -1,0 +1,273 @@
+{
+  "created_utc": "2026-10-14 08:52:20 UTC",
+  "specification": {
+    "features": [
+      "intercept",
+      "temperature_s1",
+      "temperature_s2",
+      "temperature_s3",
+      "thermal_time_s1",
+      "thermal_time_s2",
+      "thermal_time_s3",
+      "Radn_s1",
+      "Radn_s2",
+      "Radn_s3",
+      "rain14_s1",
+      "rain14_s2",
+      "rain14_s3",
+      "day_length",
+      "thermal_radiation",
+      "thermal_rain"
+    ],
+    "spacing_days": 14,
+    "integration": "daily trapezoidal quadrature",
+    "warmup": 1200,
+    "samples_per_chain": 1800,
+    "chains": 4,
+    "seed": 20261014,
+    "response_unit": "t/ha",
+    "measurement_noise_added": false,
+    "genotype_constraint": "Gaussian zero-mean prior; genotype deviations are not empirically constrained to sum to zero",
+    "refinements": [
+      {
+        "seed": 20362214,
+        "additional_samples": 600
+      }
+    ],
+    "priors": {
+      "global": [
+        2,
+        1
+      ],
+      "genotype": [
+        2,
+        0.02
+      ],
+      "sigma2": [
+        2,
+        0.1
+      ]
+    },
+    "R": "R version 4.3.3 (2024-02-29)",
+    "packages": {
+      "data.table": "1.14.10",
+      "jsonlite": "1.8.8"
+    }
+  },
+  "source": {
+    "doi": "10.6084/m9.figshare.24843705.v1",
+    "md5": "b208ae77ec2c9f9e18dc605d62d2812e",
+    "license": "CC BY 4.0"
+  },
+  "counts": {
+    "records": 3762185,
+    "trajectories": 24676,
+    "genotypes": 199,
+    "environments": 124,
+    "intervals": 278539
+  },
+  "diagnostics": {
+    "hierarchical_full": {
+      "max_rhat": 1.0046625,
+      "min_bulk_ess": 1157.055006,
+      "min_tail_ess": 2321.6100611,
+      "parameters": 3233,
+      "passed": true
+    },
+    "hierarchical_1983_1990": {
+      "max_rhat": 1.0043945,
+      "min_bulk_ess": 1094.0401723,
+      "min_tail_ess": 1965.2380947,
+      "parameters": 3233,
+      "passed": true
+    },
+    "hierarchical_1991_1998": {
+      "max_rhat": 1.0045328,
+      "min_bulk_ess": 1125.5108006,
+      "min_tail_ess": 2170.1222052,
+      "parameters": 3233,
+      "passed": true
+    },
+    "hierarchical_1999_2006": {
+      "max_rhat": 1.0043394,
+      "min_bulk_ess": 1132.9989079,
+      "min_tail_ess": 2296.0483715,
+      "parameters": 3233,
+      "passed": true
+    },
+    "hierarchical_2007_2013": {
+      "max_rhat": 1.0043241,
+      "min_bulk_ess": 1129.8505386,
+      "min_tail_ess": 2134.5910386,
+      "parameters": 3233,
+      "passed": true
+    },
+    "shared_1983_1990": {
+      "max_rhat": 1.0011823,
+      "min_bulk_ess": 4149.8071965,
+      "min_tail_ess": 4287.7619862,
+      "parameters": 33,
+      "passed": true
+    },
+    "shared_1991_1998": {
+      "max_rhat": 1.0011836,
+      "min_bulk_ess": 4149.7777895,
+      "min_tail_ess": 4229.3403435,
+      "parameters": 33,
+      "passed": true
+    },
+    "shared_1999_2006": {
+      "max_rhat": 1.0011818,
+      "min_bulk_ess": 4149.4771863,
+      "min_tail_ess": 4241.2518315,
+      "parameters": 33,
+      "passed": true
+    },
+    "shared_2007_2013": {
+      "max_rhat": 1.0011824,
+      "min_bulk_ess": 4150.144818,
+      "min_tail_ess": 4409.5104219,
+      "parameters": 33,
+      "passed": true
+    },
+    "location_1983_1990": {
+      "max_rhat": 1.002304558,
+      "min_bulk_ess": 924.790083445,
+      "min_tail_ess": 1713.363960584,
+      "parameters": 3297,
+      "passed": true
+    },
+    "svd_1983_1990": {
+      "max_rhat": 1.009211244,
+      "min_bulk_ess": 666.503257796,
+      "min_tail_ess": 1063.469537779,
+      "parameters": 2021,
+      "passed": true
+    }
+  },
+  "main_model": "hierarchical",
+  "interpretation_fit": "full",
+  "evaluation": "four held-out year blocks; all 199 genotypes, 124 environments",
+  "notes": [
+    "No artificial trajectories or added measurement noise",
+    "No markers or APSIM crop-state predictors",
+    "Only first-block CV for optional SVD/location extensions",
+    "No positivity constraint on predicted growth rate"
+  ],
+  "extensions": {
+    "location": {
+      "metrics": [
+        {
+          "scope": "trajectory checkpoints",
+          "n": 73311,
+          "rmse": 0.837486886,
+          "r2": 0.948427563,
+          "correlation": 0.984213967
+        },
+        {
+          "scope": "terminal biomass",
+          "n": 6368,
+          "rmse": 1.402700629,
+          "r2": 0.742301622,
+          "correlation": 0.94003503
+        }
+      ],
+      "diagnostics": {
+        "max_rhat": 1.002304558,
+        "min_bulk_ess": 924.790083445,
+        "min_tail_ess": 1713.363960584,
+        "parameters": 3297,
+        "passed": true
+      },
+      "features": 16,
+      "fold": "1983–1990",
+      "energy": {},
+      "chains": 4,
+      "warmup": 600,
+      "samples_per_chain": 1800
+    },
+    "svd": {
+      "metrics": [
+        {
+          "scope": "trajectory checkpoints",
+          "n": 73311,
+          "rmse": 1.317564942,
+          "r2": 0.872354447,
+          "correlation": 0.9424343
+        },
+        {
+          "scope": "terminal biomass",
+          "n": 6368,
+          "rmse": 2.263882935,
+          "r2": 0.328741755,
+          "correlation": 0.704131097
+        }
+      ],
+      "diagnostics": {
+        "max_rhat": 1.009211244,
+        "min_bulk_ess": 666.503257796,
+        "min_tail_ess": 1063.469537779,
+        "parameters": 2021,
+        "passed": true
+      },
+      "features": 10,
+      "fold": "1983–1990",
+      "energy": [
+        0.578175918,
+        0.769343352,
+        0.840134102,
+        0.891296014,
+        0.936375461,
+        0.965533966,
+        0.979483459,
+        0.987411064,
+        0.992498007,
+        0.996096006,
+        0.998452772,
+        0.999168053,
+        0.999563252,
+        0.999850331,
+        1
+      ],
+      "chains": 4,
+      "warmup": 1200,
+      "samples_per_chain": 1200,
+      "full_energy": [
+        0.578175918,
+        0.769343352,
+        0.840134102,
+        0.891296014,
+        0.936375461,
+        0.965533966,
+        0.979483459,
+        0.987411064,
+        0.992498007,
+        0.996096006,
+        0.998452772,
+        0.999168053,
+        0.999563252,
+        0.999850331,
+        1
+      ]
+    }
+  },
+  "analysis_file_md5": {
+    "analysis/01_data.R": "22681fd31bfe3d97d7d2a2dd5ef98705",
+    "analysis/02_design.R": "eed46b967f17733175592ebbae7b9b37",
+    "analysis/03_gibbs.R": "fcd6d4475a27251f94fe391d554d6b65",
+    "analysis/04_posterior.R": "7ea566cd86f0c308f0bce077f555efe3",
+    "analysis/benchmark.R": "93e35aecf1e1d5e5831ba0eb2540fd78",
+    "analysis/check_location.R": "7f970c68aa86922e849bb198514e9bd4",
+    "analysis/check.R": "ddaede790a07b6f73f11efa9111e1f9b",
+    "analysis/download_data.R": "46399136b85f93d2d0279076af7b75f4",
+    "analysis/export.R": "113bd0b60e8bd37a02e4c00e6eab2fb8",
+    "analysis/extensions.R": "a7eadbaf7a1aa262ebcc154ad6d7aa05",
+    "analysis/finalise_export.R": "52f9bf561a872b0ba6dff0c305447685",
+    "analysis/pooling.R": "e3c12640775bd510cc161c5bf1d59de4",
+    "analysis/profile.R": "c899f83211aff12aeb2ccd7a62dd2cd3",
+    "analysis/refit_failed.R": "7da52898573299304ab88d9ef2da1527",
+    "analysis/refit_location.R": "2d772885ec8f5c2743efdd43413f1142",
+    "analysis/run_example.R": "510757ad0b864ffc2bd8798e3422573b",
+    "analysis/run.R": "82005fbd0d1676ab92f19542e947c8ec"
+  }
+}

@@ -1,43 +1,195 @@
-# APSIM introduction page
+# Dynamic crop growth: an APSIM wheat workshop
 
-This package implements only the new Introduction page. It uses a restrained documentation layout: top navigation, main article, right-hand contents list, ordinary explanatory paragraphs, an interactive four-location biomass figure and an APSIM inputs–outputs schematic.
+A 12-page, static GitHub Pages workshop for AAGI. All presented empirical
+trajectories and model results come from the public APSIM wheat dataset.
+No fabricated data, markers, APSIM water-status predictors, or added
+measurement noise are used. The compact fits are new analyses, not copies
+of the performance numbers in the project slides.
 
-## View locally
+Website: https://corne00.github.io/aagi-growth-tutorial/
 
-Open `index.html` in a modern browser. All JavaScript, equation fonts, plotting code and data are bundled. If your browser restricts local scripts, run `python -m http.server 8000` in this directory and visit `http://localhost:8000`.
+## Publish this version
 
-## Update the existing GitHub Pages site
+Extract the ZIP, open a terminal in the extracted folder, and run:
 
-Copy `index.html`, `.nojekyll`, and the contents of `assets/` into your existing website repository. Merge the assets directories; do not delete the repository's other pages. The new page uses its own stylesheet and JavaScript files, so the old chapter files are not rewritten. Their redesign will happen separately, page by page.
-
-From your repository directory:
-
-```bash
-git add .
-git commit -m "Introduce APSIM biomass dataset"
-git push
+```sh
+bash deploy.sh
 ```
 
-GitHub Pages will deploy the updated introduction. The new header deliberately links only to Introduction and the references on this page. Old pages remain at their original URLs but are not presented as part of the revised tutorial.
+This clones the existing repository into a neighbouring directory, copies
+the finished site, commits and pushes using your own Git authentication.
+It preserves history and does not force-push. The ChatGPT GitHub connection
+could read the repository but rejected writes with HTTP 403; this version
+was therefore delivered as a ZIP rather than published from ChatGPT.
 
-## Data
+## Requirements
 
-The trajectories are extracted directly from `SimulatedData124Envs_Biomass.txt` in the supplied APSIM dataset. Locations: Emerald, Merredin, Narrabri, Yanco. Available years in this introduction: 1993, 2008, 2010. Six genotypes: g008, g052, g185, g127, g009, g105. The first three are displayed by default.
+R 4.3 or later, `data.table`, and `jsonlite`. Both dependencies are free and open source:
+`data.table` uses MPL-2.0 and `jsonlite` uses MIT. `splines`, `stats`, `tools`, and matrix algebra
+are bundled with R. No ASReml or other proprietary software is required.
+The published run used R 4.3.3, data.table 1.14.10 and jsonlite 1.8.8.
+The HTML assembly script uses Python 3 standard-library modules only;
+**all numerical analyses are written and executed in R**.
 
-Illustrative genotypes were selected by a farthest-point procedure on standardized biomass profiles at days 60, 100 and the final available day across the four locations in 2008. The selection illustrates contrast; it is not a random or representative population sample. Exact selection description is stored in the embedded data file. The plotted points themselves are unmodified daily APSIM values. No trajectories are padded or carried forward. The figure uses the same axis scales across locations.
+```r
+install.packages(c("data.table", "jsonlite"))
+```
 
-The full dataset comprises 199 genotypes, 124 site-years, 1983–2013. It contains model-generated phenotypes, not observed field biomass. The analysis planned for later pages uses biomass and weather drivers, excluding markers and APSIM water-status outputs as predictors. No fitted model or SVD methodology is introduced on this page.
+Run commands below from the downloaded repository's root directory.
 
-## References
+## Start with the small, real-data example
 
-Bustos-Korts et al. (2019). From QTLs to Adaptation Landscapes: Using Genotype-To-Phenotype Models to Characterize G×E Over Time. Frontiers in Plant Science 10:1540. https://doi.org/10.3389/fpls.2019.01540
+`data/example.tsv` contains 12 actual genotypes, four locations, and
+1991, 1997, and 2010. Biomass is in the original kg/ha in that file and
+converted to t/ha by the reader. The example withholds 2010.
 
-Holzworth et al. (2014). APSIM — Evolution towards a new generation of agricultural systems simulation. Environmental Modelling & Software 62:327–350. https://doi.org/10.1016/j.envsoft.2014.07.009
+```sh
+Rscript analysis/run_example.R
+```
 
-## Checks and dependencies
+Its metrics are exercise results, distinct from the full-data website.
+On this environment the example runs in under a minute; runtime varies.
 
-Programmatic checks covered genotype and year selection, shared plot scales, finite ordered trajectory data, equations, local links and empty selections. Full visual browser review was unavailable in the creation environment; review the page in your browser before presenting.
+## Reproduce the full analysis
 
-Plotly.js 3.1.0 and KaTeX 0.16.22 are bundled with their licenses under `assets/vendor/`.
+```sh
+Rscript analysis/download_data.R
+Rscript analysis/run.R full
+Rscript analysis/extensions.R
+Rscript analysis/pooling.R
+Rscript analysis/refit_failed.R
+Rscript analysis/refit_location.R
+Rscript analysis/check.R
+Rscript analysis/check_location.R
+Rscript analysis/export.R
+Rscript analysis/finalise_export.R
+python3 build_site.py
+```
 
-Every page is public when deployed to GitHub Pages. The noindex setting discourages search indexing and is not access control.
+Download: about 488 MB. Heavy posterior RDS files are intentionally excluded
+from Git. They are regenerated by the scripts; published summaries,
+diagnostics, provenance and small example are tracked. Allow several GB
+of local disk space. Full reruns take substantially longer than the example.
+Fitting jobs are cached independently. Remove the corresponding RDS file
+to deliberately rerun a changed model; remove **all** result RDS files
+when changing preprocessing or priors. Do not reuse cached fits under a new
+specification.
+
+## Model and evaluation
+
+The driver-only rate model is
+
+`dB[g,e](t)/dt = Phi(u[e](t)) %*% (beta + b[g])`.
+
+The 16-feature library includes an intercept, natural cubic splines
+(3 features each) for mean temperature, cumulative base-0 thermal time,
+radiation, and trailing 14-day rainfall; linear day length; and two
+standardised thermal-time interactions (radiation and rainfall).
+Rainfall histories before day 13 use the available days since sowing.
+Thermal time accumulates nonnegative daily mean temperatures from day 0.
+Biomass is **not** a predictor.
+
+Native daily driver features are integrated using trapezoidal quadrature
+over 14-day observation intervals, with the last native shorter interval
+included. Knots, driver scaling, and integrated-column RMS are learned
+from training data only. Each fitted genotype coefficient is
+`a[g] = beta + b[g]`; deviations have a zero-mean Gaussian **prior**,
+not an empirical sum-to-zero constraint. The full Gaussian coefficient
+vector is sampled jointly by block-Schur algebra.
+
+Independent priors, in scaled integrated-feature coordinates:
+
+* `lambda0[k] ~ Gamma(shape=2, rate=1)`.
+* `lambdaG[k] ~ Gamma(shape=2, rate=.02)`.
+* `beta[k] | lambda0[k] ~ N(0, 1/lambda0[k])`.
+* `b[g,k] | lambdaG[k] ~ N(0, 1/lambdaG[k])`.
+* `sigma2 ~ InvGamma(shape=2, scale=.1)`.
+
+The interval likelihood has independent Gaussian model discrepancies.
+This is not a measurement-error model for differenced noisy HTP data.
+The observed initial biomass is zero and fixed, not inferred. Predicted
+growth is not constrained to be positive.
+
+Full-data results use all 199 genotypes, 124 environments and 31 years.
+Held-out blocks are 1983–1990, 1991–1998, 1999–2006 and 2007–2013.
+No test responses influence fitting or transformation selection.
+This tests new years at known genotypes/locations, not new genotypes.
+
+The optional location extension has sum-to-zero location response
+coordinates and fixed N(0, 1/100) coordinate priors; all population,
+genotype and location coefficients are drawn jointly. The optional SVD
+extension compresses the nonconstant feature family to 99% training
+spectral energy. Both extensions are evaluated **only** on 1983–1990.
+Neither recreates the entire richer model in the slides.
+
+## Uncertainty and interpretation
+
+Four chains are independently initialised. The published manifest and
+CSV files contain split rank-normalised R-hat, bulk ESS and tail ESS for
+all sampled coefficient/precision/variance coordinates. Thresholds are
+R-hat < 1.01 and both ESS >= 400. The main hierarchy's initial 1200 retained
+draws per chain were extended by 600 draws, resuming saved states with
+a distinct documented seed. A fresh full R run reproduces that procedure.
+
+Interactive trajectory summaries use 160 equally selected joint posterior
+draws. Credible intervals omit interval discrepancies. Predictive paths
+accumulate independent residual increments; ten residual replicates per
+selected draw are used for numerical quantile estimation. Coverage is
+computed over **all** held-out terminal trajectories, not the displayed
+subset. Narrow credible intervals need not cover reduced-model error.
+
+ALE interprets growth rate (t/ha/day) under an equally weighted reference
+sample of 6000 evenly indexed environment-days. Other driver coordinates
+are held at their observed values while one coordinate is locally varied.
+It is a model summary, not a causal effect. Genotype deviation bands use
+the same joint genotype and population draws.
+
+G/E/G×E summaries use double-centred observed and out-of-fold predicted
+biomass matrices at common days 14–112. Reported fractions are orthogonal
+descriptive mean-square fractions, not REML variance components.
+
+The separate pooling exercise uses 12 genotypes. Three preselected
+genotypes have one or three training environments; the other nine retain
+their 1991–2006 training data. Test errors use only those three genotypes
+in 2007–2013. Independent fits have N(0,1) coefficient priors, explicitly
+different from the population/genotype hierarchy. This experiment shows
+the benefit of sharing information under its stated priors and sampling
+design, rather than a general guarantee of hierarchical superiority.
+
+## Performance checks
+
+```sh
+Rscript analysis/profile.R current
+Rscript analysis/benchmark.R
+```
+
+The preserved baseline implementation is `results/gibbs-baseline.R`.
+The benchmark records CPU and wall-clock time on real full-data statistics.
+Optimisations remove diagonal matrix products, cache sufficient statistics
+and site precision, and batch genotype/location calculations. Genotype
+same-seed draws agree to numerical precision. The final joint location
+kernel uses different random draws; its exact conditional moments are
+checked against a direct dense calculation in `check_location.R`.
+Run timings are measurements, not guaranteed hardware-independent speedups.
+
+## Website
+
+No build service or server-side R is needed to host the generated pages.
+GitHub Pages should serve the root of the `main` branch. JavaScript
+uses saved R results and `Plotly.react`, so changing controls updates
+existing plots. Code expands on click and is keyboard-accessible.
+No user data are collected. `noindex` discourages search indexing but
+does not restrict public access.
+
+## Data attribution
+
+Bustos-Korts, D., Malosetti, M., Chenu, K., Chapman, S., Boer, M. P.,
+Zheng, B., and van Eeuwijk, F. A. (2019). From QTLs to Adaptation
+Landscapes: Using Genotype-To-Phenotype Models to Characterize G×E Over
+Time. *Frontiers in Plant Science* 10:1540.
+https://doi.org/10.3389/fpls.2019.01540
+
+Dataset version 1: https://doi.org/10.6084/m9.figshare.24843705.v1
+(CC BY 4.0). Biomass file MD5: `b208ae77ec2c9f9e18dc605d62d2812e`.
+Only the documented subset and processed summaries are redistributed here.
+Vendor licences are retained in `assets/vendor/`.
