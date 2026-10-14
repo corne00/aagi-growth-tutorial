@@ -1,0 +1,9 @@
+data/SimulatedData124Envs_Biomass.txt
+results/*.rds*
+results/*.out
+assets/results.js
+__pycache__/
+.Rhistory
+.RData
+node_modules/
+assets/result-input-small.js
